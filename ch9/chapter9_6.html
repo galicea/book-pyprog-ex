@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>chapter9_6</title>
+    <script src="https://cdn.jsdelivr.net/npm/brython@3.11.3/brython.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/brython@3.11.3/brython_stdlib.js"></script>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, sans-serif; line-height: 1.6; padding: 20px; max-width: 900px; margin: 0 auto; color: #333; }
+        img { max-width: 100%; height: auto; margin: 20px auto; display: block; }
+        .nav-link { display: inline-block; margin-bottom: 20px; text-decoration: none; color: #0056b3; font-weight: bold; border: 1px solid #0056b3; padding: 5px 10px; border-radius: 4px; }
+        .nav-link:hover { background-color: #0056b3; color: white; }
+        
+        /* Style dla widgetów Brythona */
+        .brython-box { background: #f8f9fa; border: 1px solid #ddd; padding: 15px; border-radius: 6px; margin: 20px 0; }
+        .brython-code { width: 100%; font-family: monospace; font-size: 14px; padding: 10px; border: 1px solid #ccc; box-sizing: border-box; }
+        .run-btn { background: #28a745; color: white; border: none; padding: 8px 15px; margin: 10px 0; border-radius: 4px; cursor: pointer; font-weight: bold; }
+        .run-btn:hover { background: #218838; }
+        .brython-output { background: #272822; color: #f8f8f2; padding: 10px; border-radius: 4px; min-height: 40px; font-family: monospace; white-space: pre-wrap; }
+    </style>
+</head>
+<body onload="brython()">
+    <a href="../index.html" class="nav-link">⬅ Wróć do spisu treści</a>
+    <hr>
+<h2>Metody statyczne</h2>
+<p><strong>Przykład 8.7</strong><em>:</em> <code>o_staticmethod</code></p>
+<div class="brython-box">
+    <textarea id="code-1" class="brython-code" rows="36">
+class Robot:
+  u'''Reprezentuje robota, z nazwą.'''
+
+  def __init__(self, nazwa):
+    u'''Inicjalizuje dane.'''
+    self.nazwa = nazwa
+    print('(Inicjalizacja %s)' % self.nazwa)
+
+
+  def przywitajSie(self):
+    u'''Powitanie robota.
+    Tak, one naprawdę to potrafią.'''
+    print('Melduję się, moi panowie nazywają mnie %s.' % self.nazwa)
+
+class RobotNG(Robot):
+  populacja = 0
+
+  def __init__(self, nazwa):
+    Robot.__init__(self,nazwa)
+    RobotNG.populacja += 1
+
+  def jakDuzo():
+    u'''Wypisuje aktualną populację.'''
+    print('Mamy %d roboty.' % RobotNG.populacja)
+
+  jakDuzo=staticmethod(jakDuzo)
+
+
+droid1 = RobotNG('R2-D2')
+droid1.przywitajSie()
+
+droid2 = RobotNG('C-3PO')
+droid2.przywitajSie()
+
+RobotNG.jakDuzo()</textarea>
+    <br><button class="run-btn" data-idx="1">▶ Uruchom kod</button>
+    <pre id="output-1" class="brython-output"></pre>
+</div>
+
+<p><strong>Objaśnienie</strong></p>
+<p>Możemy stosować dwa typy pól w obiektach — zmienne klas i zmienne obiektów. Do pierwszych odwołujemy się poprzez nazwę klasy, a do drugich poprzez przedrostek self.  Zmana (własność) klasy jest wspólna dla całej klasy. Tu zmienną (własnością) klasy jest populacja, a zmienną obiektów jest nazwa.</p>
+<p>Zmienne klasy są dzielone, co oznacza, że są dostępne dla wszystkich instancji danej klasy. Istnieje tylko jedna kopia zmiennej klasy, czyli jeśli jeden obiekt zmieni w jakiś sposób tę zmienną, to zmiana ta będzie widziana również przez wszystkie pozostałe instancje.</p>
+<p>Tak więc do zmiennej populacja, która jest zmienną klasy, odnosimy się przez RobotNG.populacja, a nie przez self.populacja. Natomiast do zmiennej obiektu nazwa odnosimy się w metodach tego obiektu przez self.nazwa. Zapamiętaj tę różnicę pomiędzy zmiennymi klas i zmiennymi obiektów. Zapamiętaj też, że zmienna obiektu o takiej samej nazwie, jak zmienna klasy, zasłoni zmienną klasy! Zauważ, że metoda <strong>init</strong> inicjalizuje instancję klasy Robot nazwą podaną przez argument. Metoda <strong>init</strong> obiektu pochodnego (RobotNG) zwiększa dodatkowo o 1 licznik populacja. Pokazano także odwołanie do metody (konstruktora) przodka. Robimy to po prostu podając nazwę klasy przodka (zamiast self.). Zauważ też, że wartość self.name jest inna dla każdego obiektu, ponieważ jest to zmienna obiektu.</p>
+<p>Zapamiętaj, że do metod i pól tego samego obiektu możesz odnosić wyłącznie za pomocą <strong>self</strong>.</p>
+
+<script type="text/python">
+        from browser import document
+        import sys
+
+        # Wspólna przestrzeń nazw dla całej strony (zmienne przeżywają między okienkami)
+        page_namespace = {}
+
+        def run_code(ev):
+            idx = ev.target.attrs["data-idx"]
+            out_element = document[f"output-{idx}"]
+            out_element.text = ""
+            
+            class Pisarz:
+                def write(self, data):
+                    out_element.text += str(data)
+                def flush(self): pass
+            
+            sys.stdout = Pisarz()
+            sys.stderr = Pisarz()
+            
+            kod = document[f"code-{idx}"].value
+            try:
+                exec(kod, page_namespace)
+            except Exception as e:
+                print("BŁĄD:", e)
+
+        # Przypisanie zdarzeń do wszystkich przycisków na stronie
+        for btn in document.select(".run-btn"):
+            btn.bind("click", run_code)
+    </script>
+</body>
+</html>

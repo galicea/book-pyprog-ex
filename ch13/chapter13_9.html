@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>chapter13_9</title>
+    <script src="https://cdn.jsdelivr.net/npm/brython@3.11.3/brython.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/brython@3.11.3/brython_stdlib.js"></script>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, sans-serif; line-height: 1.6; padding: 20px; max-width: 900px; margin: 0 auto; color: #333; }
+        img { max-width: 100%; height: auto; margin: 20px auto; display: block; }
+        .nav-link { display: inline-block; margin-bottom: 20px; text-decoration: none; color: #0056b3; font-weight: bold; border: 1px solid #0056b3; padding: 5px 10px; border-radius: 4px; }
+        .nav-link:hover { background-color: #0056b3; color: white; }
+        
+        /* Style dla widgetów Brythona */
+        .brython-box { background: #f8f9fa; border: 1px solid #ddd; padding: 15px; border-radius: 6px; margin: 20px 0; }
+        .brython-code { width: 100%; font-family: monospace; font-size: 14px; padding: 10px; border: 1px solid #ccc; box-sizing: border-box; }
+        .run-btn { background: #28a745; color: white; border: none; padding: 8px 15px; margin: 10px 0; border-radius: 4px; cursor: pointer; font-weight: bold; }
+        .run-btn:hover { background: #218838; }
+        .brython-output { background: #272822; color: #f8f8f2; padding: 10px; border-radius: 4px; min-height: 40px; font-family: monospace; white-space: pre-wrap; }
+    </style>
+</head>
+<body onload="brython()">
+    <a href="../index.html" class="nav-link">⬅ Wróć do spisu treści</a>
+    <hr>
+<h3>Logiczna wartość różnych danych</h3>
+<p><strong>Przykład 12.7</strong><em>:</em> o_bool</p>
+<div class="brython-box">
+    <textarea id="code-4" class="brython-code" rows="20">
+class Test(object):
+# to zadziała zarówno z Python2x jak i Python 3#
+    def __init__(self, value):
+        self.value = value
+
+    def __bool__(self):
+        return False
+
+    def __nonzero__(self):
+        return self.__bool__()
+
+class Queue(object):
+    def __init__(self, iterable):
+        self.queue = iterable
+    def __len__(self):
+        return len(self.queue)
+
+print(bool(Test(0)))
+print(bool(Queue([])))
+print(bool(Queue([1,3,2])))</textarea>
+    <br><button class="run-btn" data-idx="4">▶ Uruchom kod</button>
+    <pre id="output-4" class="brython-output"></pre>
+</div>
+
+<p>Objaśnienie:</p>
+<blockquote>Obiekt klasy Test zawsze zwraca False. 
+    Ustala tą wartość metoda <strong>bool</strong> lub <strong>nonzero</strong>. 
+    Natomiast wartość obiektu klasy Queue zależy od tego, czy zainicjowano go z pustą listą.
+</blockquote>
+    <script type="text/python">
+        from browser import document
+        import sys
+
+        # Wspólna przestrzeń nazw dla całej strony (zmienne przeżywają między okienkami)
+        page_namespace = {}
+
+        def run_code(ev):
+            idx = ev.target.attrs["data-idx"]
+            out_element = document[f"output-{idx}"]
+            out_element.text = ""
+            
+            class Pisarz:
+                def write(self, data):
+                    out_element.text += str(data)
+                def flush(self): pass
+            
+            sys.stdout = Pisarz()
+            sys.stderr = Pisarz()
+            
+            kod = document[f"code-{idx}"].value
+            try:
+                exec(kod, page_namespace)
+            except Exception as e:
+                print("BŁĄD:", e)
+
+        # Przypisanie zdarzeń do wszystkich przycisków na stronie
+        for btn in document.select(".run-btn"):
+            btn.bind("click", run_code)
+    </script>
+</body>
+</html>

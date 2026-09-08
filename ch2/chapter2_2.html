@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>chapter2_2</title>
+    <script src="https://cdn.jsdelivr.net/npm/brython@3.11.3/brython.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/brython@3.11.3/brython_stdlib.js"></script>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, sans-serif; line-height: 1.6; padding: 20px; max-width: 900px; margin: 0 auto; color: #333; }
+        img { max-width: 100%; height: auto; margin: 20px auto; display: block; }
+        .nav-link { display: inline-block; margin-bottom: 20px; text-decoration: none; color: #0056b3; font-weight: bold; border: 1px solid #0056b3; padding: 5px 10px; border-radius: 4px; }
+        .nav-link:hover { background-color: #0056b3; color: white; }
+        
+        /* Style dla widgetów Brythona */
+        .brython-box { background: #f8f9fa; border: 1px solid #ddd; padding: 15px; border-radius: 6px; margin: 20px 0; }
+        .brython-code { width: 100%; font-family: monospace; font-size: 14px; padding: 10px; border: 1px solid #ccc; box-sizing: border-box; }
+        .run-btn { background: #28a745; color: white; border: none; padding: 8px 15px; margin: 10px 0; border-radius: 4px; cursor: pointer; font-weight: bold; }
+        .run-btn:hover { background: #218838; }
+        .brython-output { background: #272822; color: #f8f8f2; padding: 10px; border-radius: 4px; min-height: 40px; font-family: monospace; white-space: pre-wrap; }
+    </style>
+</head>
+<body onload="brython()">
+    <a href="../index.html" class="nav-link">⬅ Wróć do spisu treści</a>
+    <hr>
+<h2>Mechanizmy</h2>
+<p><strong>Przykład 1.2 (sort)</strong></p>
+<div class="brython-box">
+    <textarea id="code-1" class="brython-code" rows="6">
+a=[1,5,4,2,0]
+a.sort()
+print(a)
+print(a.sort())</textarea>
+    <br><button class="run-btn" data-idx="1">▶ Uruchom kod</button>
+    <pre id="output-1" class="brython-output"></pre>
+</div>
+
+<p><strong>Objaśnienie:</strong></p>
+<blockquote><p>Do zmiennej a wpisujemy listę liczb. Lista jest obiektem, który ma swoją metodę sortowania. Prawie każdy kurs programowania zawiera opis algorytmu (algorytmów) sortowania – czyli opis <strong>jak to zrobić</strong>. Jak widać w Pythonie to nie jest potrzebne. Wystarczy napisać co ma być zrobione.</p>
+<p>Ostatni wiersz w powyższym przykładzie pokazuje, że należy odróżnić wynik działania funkcji (w tym wypadku metodę <em>sort()</em>) i wynik zwracany przez funkcję. Wywołanie <em>a.sort()</em> spowoduje posortowanie a, ale zwracany wynik jest pusty (None). Jeśli więc chcemy, aby w zmiennej b znalazły się posortowane liczby z a, to musimy napisać <strong>b=a;b.sort()</strong>, a nie <strong>b=a.sort()</strong>.</p>
+</blockquote>
+
+    <script type="text/python">
+        from browser import document
+        import sys
+
+        # Wspólna przestrzeń nazw dla całej strony (zmienne przeżywają między okienkami)
+        page_namespace = {}
+
+        def run_code(ev):
+            idx = ev.target.attrs["data-idx"]
+            out_element = document[f"output-{idx}"]
+            out_element.text = ""
+            
+            class Pisarz:
+                def write(self, data):
+                    out_element.text += str(data)
+                def flush(self): pass
+            
+            sys.stdout = Pisarz()
+            sys.stderr = Pisarz()
+            
+            kod = document[f"code-{idx}"].value
+            try:
+                exec(kod, page_namespace)
+            except Exception as e:
+                print("BŁĄD:", e)
+
+        # Przypisanie zdarzeń do wszystkich przycisków na stronie
+        for btn in document.select(".run-btn"):
+            btn.bind("click", run_code)
+    </script>
+</body>
+</html>

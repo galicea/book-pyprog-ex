@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>chapter10_4</title>
+    <script src="https://cdn.jsdelivr.net/npm/brython@3.11.3/brython.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/brython@3.11.3/brython_stdlib.js"></script>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, sans-serif; line-height: 1.6; padding: 20px; max-width: 900px; margin: 0 auto; color: #333; }
+        img { max-width: 100%; height: auto; margin: 20px auto; display: block; }
+        .nav-link { display: inline-block; margin-bottom: 20px; text-decoration: none; color: #0056b3; font-weight: bold; border: 1px solid #0056b3; padding: 5px 10px; border-radius: 4px; }
+        .nav-link:hover { background-color: #0056b3; color: white; }
+        
+        /* Style dla widgetów Brythona */
+        .brython-box { background: #f8f9fa; border: 1px solid #ddd; padding: 15px; border-radius: 6px; margin: 20px 0; }
+        .brython-code { width: 100%; font-family: monospace; font-size: 14px; padding: 10px; border: 1px solid #ccc; box-sizing: border-box; }
+        .run-btn { background: #28a745; color: white; border: none; padding: 8px 15px; margin: 10px 0; border-radius: 4px; cursor: pointer; font-weight: bold; }
+        .run-btn:hover { background: #218838; }
+        .brython-output { background: #272822; color: #f8f8f2; padding: 10px; border-radius: 4px; min-height: 40px; font-family: monospace; white-space: pre-wrap; }
+    </style>
+</head>
+<body onload="brython()">
+    <a href="../index.html" class="nav-link">⬅ Wróć do spisu treści</a>
+    <hr>
+<h2>Bazy danych</h2>
+<p><strong>Przykład 9.4</strong><em>:</em> sqlite</p>
+<div class="brython-box">
+    <textarea id="code-1" class="brython-code" rows="50">
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+import os
+import sqlite3
+
+def connect_db():
+    # przylaczenie bazy danych
+    db = sqlite3.connect('test.db')
+    return db
+
+def ini_db():
+    try:
+        db = connect_db()
+        cur = db.cursor()
+        cur.executescript('''\
+CREATE TABLE "user" (
+  "id" INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+  "username" TEXT,
+  "password" TEXT
+);
+        ''')
+        db.commit()
+    except sqlite3.Error as e:
+        print("DB error:", e.args[0])
+    except Error as e:
+        print("rror:", e.args[0])
+
+def new_user(db, name, password):
+    try:
+        cursor = db.cursor()
+        cursor.executescript("insert into user(username, password) values ('%s','%s')" % (name, password))
+        # nie powoduje błędu z O''Connor:
+        #   cursor.execute("insert into user(username, password) values (?,?)" , (name, password))
+        db.commit()
+    except sqlite3.Error as e:
+        print("DB error:", e.args[0])
+        print('nieudane  wstawienie %s ', name)
+
+ini_db()
+db=connect_db()
+new_user(db, 'Tomek','haslotomka')
+new_user(db, 'Tomek','haslotomka')
+new_user(db, "O'Connor",'haslo2')
+new_user(db, 'Romek','hasloromka')
+
+cursor = db.cursor()
+for (id, username, password) in cursor.execute('select id, username, password from user'):
+    print('%s %s:%s' % (id, username, password))</textarea>
+    <br><button class="run-btn" data-idx="1">▶ Uruchom kod</button>
+    <pre id="output-1" class="brython-output"></pre>
+</div>
+
+<p><strong>Objaśnienie:</strong></p>
+<ul>
+<li>Istnieje wiele różnych baz danych. Powyższy przykład dotyczy najprostszej z nich: SQLite. Dane są pamiętane w przypadku tej bazy w jednym pliku. W przypadku bardziej zaawansowanych baz danych komunikacja odbywa się za pośrednictwem sieci. Dla SQLite potrzebny jest tylko odpowiedni moduł – w przypadku Pythona jest to sqlite3.</li>
+<li>Połączenie z bazą danych (funkcja connect) ustala zazwyczaj jedynie parametry komunikacji. W przypadku SQLite polecenie sqlite3.connect('test.db') tworzy bazę – o ile wcześniej ona nie istniała.</li>
+<li>Komunikacja z bazą odbywa się z użyciem języka SQL. Polecenia nie są przesyłane wprost poprzez obiekt połączenia (db w powyższym przykładzie), ale przez obiekt kursora (ang. cursor). Umożliwia to  stworzenie wielu kursorów dla jednej bazy – na przykład dwa kursory do przeglądania równolegle dwóch tabel.</li>
+<li>Do wysłania polecenia SQL można użyć funkcji  executescript lub execute. W tym drugim przypadku jako wynik funkcji dostajemy rezultat zapytania w postacie generowanych wierszy.</li>
+<li>Polecenie  SQL ‘CREATE TABLE "user" … ‘ tworzy tabelę o nazwie „user”. Polecenie ‘insert into ….’ wstawia wiersze do tej tabeli. Natomiast ‘select ...’ odczytuje wstawione dane.</li>
+<li>Funkcja commit() w obiekcie połączenia z bazą powoduje zakończenie zapytania i zapisanie danych na dysku.</li>
+</ul>
+
+<script type="text/python">
+        from browser import document
+        import sys
+
+        # Wspólna przestrzeń nazw dla całej strony (zmienne przeżywają między okienkami)
+        page_namespace = {}
+
+        def run_code(ev):
+            idx = ev.target.attrs["data-idx"]
+            out_element = document[f"output-{idx}"]
+            out_element.text = ""
+            
+            class Pisarz:
+                def write(self, data):
+                    out_element.text += str(data)
+                def flush(self): pass
+            
+            sys.stdout = Pisarz()
+            sys.stderr = Pisarz()
+            
+            kod = document[f"code-{idx}"].value
+            try:
+                exec(kod, page_namespace)
+            except Exception as e:
+                print("BŁĄD:", e)
+
+        # Przypisanie zdarzeń do wszystkich przycisków na stronie
+        for btn in document.select(".run-btn"):
+            btn.bind("click", run_code)
+    </script>
+</body>
+</html>

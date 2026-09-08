@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>chapter12_6</title>
+    <script src="https://cdn.jsdelivr.net/npm/brython@3.11.3/brython.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/brython@3.11.3/brython_stdlib.js"></script>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, sans-serif; line-height: 1.6; padding: 20px; max-width: 900px; margin: 0 auto; color: #333; }
+        img { max-width: 100%; height: auto; margin: 20px auto; display: block; }
+        .nav-link { display: inline-block; margin-bottom: 20px; text-decoration: none; color: #0056b3; font-weight: bold; border: 1px solid #0056b3; padding: 5px 10px; border-radius: 4px; }
+        .nav-link:hover { background-color: #0056b3; color: white; }
+        
+        /* Style dla widgetów */
+        .static-box { background: #e9ecef; border: 1px solid #ced4da; padding: 15px; border-radius: 6px; margin: 20px 0; }
+        .brython-box { background: #f8f9fa; border: 1px solid #ddd; padding: 15px; border-radius: 6px; margin: 20px 0; }
+        .brython-code { width: 100%; font-family: monospace; font-size: 14px; padding: 10px; border: 1px solid #ccc; box-sizing: border-box; }
+        .run-btn { background: #28a745; color: white; border: none; padding: 8px 15px; margin: 10px 0; border-radius: 4px; cursor: pointer; font-weight: bold; }
+        .run-btn:hover { background: #218838; }
+        .brython-output { background: #272822; color: #f8f8f2; padding: 15px; border-radius: 4px; min-height: 50px; font-family: monospace; white-space: pre-wrap; }
+    </style>
+</head>
+<body onload="brython()">
+    <a href="../index.html" class="nav-link">⬅ Wróć do spisu treści</a>
+    <hr>
+<h2>Obiekty</h2>
+<p><strong>Przykład 11.2a</strong><em>:</em>wx_obj (Kod do uruchomienia lokalnie na komputerze)</p>
+<div class="static-box">
+    <pre style="margin: 0;"><code style="font-family: monospace; font-size: 14px;">
+#!/usr/bin/env python
+import wx
+
+# tworzymy obiekt aplikacji graficznej
+app = wx.App(0)
+# obiekt okna (klasa Frame)
+frame = wx.Frame(None, -1, "Tytul okna")
+frame.Show(True)
+
+# panel = obiekt wnetrza okna
+panel = wx.Panel(frame, -1)
+# obiekt etykiety w oknie
+label1 = wx.StaticText(panel, -1, "Etykieta")
+
+# umieszczamy panel w oknie
+frame.panel = panel
+
+# okno w aplikacji
+app.SetTopWindow(frame)
+app.MainLoop()
+</code></pre>
+</div>
+
+<p><strong>Objaśnienie.</strong></p>
+<p>Aplikacja graficzna wykonuje pętlę (<strong>MainLoop</strong>) czekając na działania ze strony użytkownika. Poleceniem SetTopWindow wyświetlamy okno (<strong>frame</strong>) w którym ma zachodzić interakcja. Wnętrze okna nazywa się panelem i jest obiektem typu  <strong>wx.Panel</strong>. Na panelu umieszcza się kontrolki (ang. <strong>widgets</strong>), które są odpowiedzialne za poszczególne elementy wizualne. Tu użyliśmy kontrolki <strong>wx.StaticText</strong> do umieszczenia na panelu etykiety.</p>
+<p>Zauważmy, że biblioteka <strong>wx</strong> stosuje trzy rodzaje powiązania obiektów ze sobą. Może to następować poprzez parametr przy tworzeniu obiektu (jak w instrukcji <strong>wx.Panel(frame, -1)</strong> – podajemy w parametrze okno dla którego tworzymy panel). Gdy to powiązanie jest zmienne – jak w przypadku otwartego okna – stosujemy odrębną funkcję – jak w instrukcji app.SetTopWindow(frame). Trzecim sposobem jest bezpośrednia zmiana własności. Na przykład okno ma jeden panel dostępny przez własność o nazwie panel. Możemy tą własność ustawiać jak w instrukcji  frame.panel = panel (zauważmy, że frame.panel i panel to dwie różne zmienne).</p>
+
+<p><strong>Przykład 11.2b</strong><em>:</em> wx_inherit (Kod do uruchomienia lokalnie na komputerze)</p>
+<div class="static-box">
+    <pre style="margin: 0;"><code style="font-family: monospace; font-size: 14px;">
+#!/usr/bin/env python
+
+import wx
+
+class TestApp(wx.App):
+
+    def OnInit(self):
+        frame = wx.Frame(None, -1, "Tytul okna")
+        frame.Show(True)
+        panel = wx.Panel(frame, -1)
+        label1 = wx.StaticText(panel, -1, "Etykieta")
+        frame.panel = panel
+        self.SetTopWindow(frame)
+        return True
+
+app = TestApp(0)
+app.MainLoop()
+    </code></pre>
+</div>
+
+<p><strong>Objaśnienie</strong></p>
+<blockquote>Jest to ten sam przykład, co 9.2a, ale wszystkie operacje dotyczące aplikacji graficznej zostały zaimplementowane w metodzie OnInit klasy pochodnej do wx.App. Należy zwrócić uwagę na fakt, że zamiast do zmiennej app, wewnątrz klasy odwołujemy się do parametru self – pod którym kryje się oczywiście odwołanie do obiektu aplikacji. W analogiczny sposób można tworzyć klasy pochodne do innych elementów graficznych.</blockquote>
+
+<hr>
+
+<!-- Nowy blok z kodem Brython DOM -->
+<h3>Wersja przeglądarkowa (Brython DOM)</h3>
+<p>Poniżej znajduje się ten sam program, ale zamiast <code>wxPython</code> używa obiektów przeglądarki (DOM). Możesz go uruchomić bezpośrednio tutaj!</p>
+
+<div class="brython-box">
+    <textarea id="code-2" class="brython-code" rows="35">
+from browser import document, html
+
+class TestApp:
+    def __init__(self, target_id):
+        # Pobieramy nasz "Panel" (okienko wyniku) na stronie HTML
+        self.panel = document[target_id]
+        
+        # Tworzymy ramkę okna (odpowiednik wx.Frame)
+        self.window = html.DIV(style={
+            "border": "2px solid #333",
+            "borderRadius": "8px",
+            "padding": "0",
+            "margin": "10px 0",
+            "backgroundColor": "#f0f0f0",
+            "boxShadow": "0 4px 8px rgba(0,0,0,0.2)",
+            "width": "400px"
+        })
+        
+        # Tworzymy pasek tytułowy (odpowiednik tytułu okna)
+        self.title_bar = html.DIV(style={
+            "backgroundColor": "#4a6fa5",
+            "color": "white",
+            "padding": "10px 15px",
+            "borderRadius": "6px 6px 0 0",
+            "fontWeight": "bold",
+            "fontSize": "16px",
+            "cursor": "default",
+            "display": "flex",
+            "justifyContent": "space-between",
+            "alignItems": "center"
+        })
+        self.title_bar <= html.SPAN("Tytul okna")
+        
+        # Dodajemy przycisk zamykania (dla efektu)
+        close_btn = html.BUTTON("✕", style={
+            "backgroundColor": "transparent",
+            "border": "none",
+            "color": "white",
+            "fontSize": "18px",
+            "cursor": "pointer",
+            "padding": "0 5px"
+        })
+        close_btn.bind("click", self.onClose)
+        self.title_bar <= close_btn
+        
+        # Tworzymy panel wewnętrzny (odpowiednik wx.Panel)
+        self.inner_panel = html.DIV(style={
+            "padding": "20px",
+            "backgroundColor": "white",
+            "borderRadius": "0 0 6px 6px",
+            "minHeight": "100px"
+        })
+        
+        # Tworzymy etykietę (odpowiednik wx.StaticText)
+        self.label1 = html.SPAN("Etykieta", style={
+            "marginRight": "15px",
+            "fontSize": "14px"
+        })
+        
+        # Tworzymy przycisk (odpowiednik wx.Button)
+        button1 = html.BUTTON("Kliknij", style={
+            "padding": "5px 15px",
+            "backgroundColor": "#4a6fa5",
+            "color": "white",
+            "border": "none",
+            "borderRadius": "4px",
+            "cursor": "pointer"
+        })
+        
+        # Podpinamy zdarzenie (odpowiednik Bind)
+        button1.bind("click", self.onButton1Click)
+        
+        # Dodajemy kontrolki do panelu wewnętrznego
+        self.inner_panel <= self.label1
+        self.inner_panel <= button1
+        
+        # Składamy okno
+        self.window <= self.title_bar
+        self.window <= self.inner_panel
+        
+        # Dodajemy okno do panelu głównego
+        self.panel <= self.window
+
+    def onButton1Click(self, event):
+        # Odpowiednik SetLabel
+        self.label1.text = "Button pressed!"
+
+    def onClose(self, event):
+        # Symulacja zamknięcia okna
+        self.window.style.display = "none"
+
+# Uruchamiamy aplikację, wskazując identyfikator pola wynikowego
+app = TestApp("output-2")
+</textarea>
+    <br><button class="run-btn" data-idx="2">▶ Uruchom kod (Brython)</button>
+    <!-- Element div zamiast pre, bo wrzucamy do niego prawdziwe przyciski z HTML -->
+    <div id="output-2" class="brython-output">Tu pojawi się wygenerowany interfejs...</div>
+</div>
+
+<script type="text/python">
+    from browser import document
+    import sys
+
+    page_namespace = {}
+
+    def run_code(ev):
+        idx = ev.target.attrs["data-idx"]
+        out_element = document[f"output-{idx}"]
+        # Czyszczenie poprzedniej zawartości okienka
+        out_element.clear()
+        
+        class Pisarz:
+            def write(self, data):
+                out_element <= data
+            def flush(self): pass
+        
+        sys.stdout = Pisarz()
+        sys.stderr = Pisarz()
+        
+        kod = document[f"code-{idx}"].value
+        try:
+            exec(kod, page_namespace)
+        except Exception as e:
+            print("BŁĄD:", e)
+
+    for btn in document.select(".run-btn"):
+        btn.bind("click", run_code)
+</script>
+</body>
+</html>

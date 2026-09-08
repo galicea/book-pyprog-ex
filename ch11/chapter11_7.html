@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>chapter10_1</title>
+    <script src="https://cdn.jsdelivr.net/npm/brython@3.11.3/brython.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/brython@3.11.3/brython_stdlib.js"></script>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, sans-serif; line-height: 1.6; padding: 20px; max-width: 900px; margin: 0 auto; color: #333; }
+        img { max-width: 100%; height: auto; margin: 20px auto; display: block; }
+        .nav-link { display: inline-block; margin-bottom: 20px; text-decoration: none; color: #0056b3; font-weight: bold; border: 1px solid #0056b3; padding: 5px 10px; border-radius: 4px; }
+        .nav-link:hover { background-color: #0056b3; color: white; }
+        
+        /* Style dla widgetów Jobe */
+        .jobe-box { background: #f8f9fa; border: 1px solid #ddd; padding: 15px; border-radius: 6px; margin: 20px 0; }
+        .jobe-code { width: 100%; font-family: monospace; font-size: 14px; padding: 10px; border: 1px solid #ccc; box-sizing: border-box; }
+        .run-btn { background: #28a745; color: white; border: none; padding: 8px 15px; margin: 10px 0; border-radius: 4px; cursor: pointer; font-weight: bold; }
+        .run-btn:hover { background: #218838; }
+        .output-box { background: #272822; color: #f8f8f2; padding: 10px; border-radius: 4px; min-height: 40px; font-family: monospace; white-space: pre-wrap; }
+    </style>
+</head>
+<body>
+    <a href="../index.html" class="nav-link">⬅ Wróć do spisu treści</a>
+    <hr>
+
+<h2>Kodowanie oparte o testy</h2>
+<p><strong>Przykład 10.6</strong><em>:</em>tdd</p>
+<div class="jobe-box">
+<textarea id="code-1" class="jobe-code" rows="27">
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+class TSzyfrant:
+
+    def __init__(self,klucz):
+        self.klucz=klucz
+
+    def szyfruj(self, liczba):
+        return (liczba + self.klucz) % 256
+
+    def odszyfruj(self, liczba):
+        return (256 + liczba - self.klucz) % 256
+
+def TestFunkcjonalny():
+    szyfrant=TSzyfrant(88)
+    wiadomosc = int(input('Podaj liczbę: '))
+    szyfr=szyfrant.szyfruj(wiadomosc)
+    print('Kod=%s' % szyfr)
+    print('Odszyfrowano=%s' % szyfrant.odszyfruj(szyfr))
+
+import unittest
+from random import randrange
+
+class TestyJednostkowe(unittest.TestCase):
+
+    def setUp(self):
+        """Call before every test case."""
+        self.szyfrant = TSzyfrant(88)
+
+    def test1(self):
+        for n in range(10):
+            msg = randrange(255)
+            szyfr = self.szyfrant.szyfruj(msg)
+            print(szyfr)
+            msg2 = self.szyfrant.odszyfruj(szyfr)
+            self.assertEqual(msg, msg2)
+
+import sys
+
+if __name__ == '__main__':
+  runner = unittest.TextTestRunner(stream=sys.stdout, verbosity=2)
+  unittest.main(testRunner=runner, exit=False)
+  # TestFunkcjonalny()
+
+</textarea>
+    <br><button class="run-btn" data-idx="1" 
+    onclick="runJobeMultiFile('code-1','','jobe-output-1')">▶ Uruchom kod</button>
+    <pre id="jobe-output-1" class="output-box"></pre>
+</div>
+
+
+<p><strong>Objaśnienie</strong></p>
+<ul>
+<li>Test funkcjonalny w powyższym przykładzie to po prostu dodatkowa funkcja w której wykonuje się obliczenia dla przykładowych danych.</li>
+<li>Nieco bardziej złożone jest pisanie testów jednostkowych. Używane w nich jest polecenie assert, które sprawdza poprawność wykonanych obliczeń. Po słowie kluczowym assert podaje się warunek. Gdy warunek nie jest spełniony – wywoływany jest wyjątek. Dodatkowo po warunku można podać komunikat przesyłany do wyjątku.</li>
+<li>W kodowaniu sterowanym testami zaczynamy od napisania testu, zastępując wywoływane funkcje „zajawkami” (nagłówek + słowo kluczowe pass). Test oczywiście nie przejdzie póki nie wykonamy poprawnej implementacji funkcji.</li>
+</ul>
+
+
+    <script>
+        // Funkcja pomocnicza do kodowania UTF-8 do Base64
+        function utf8ToBase64(str) {
+            return btoa(unescape(encodeURIComponent(str)));
+        }
+
+        async function runJobeMultiFile(jobe_main, jobe_input, jobe_output) {
+            
+            const mainCode = document.getElementById(jobe_main).value;
+            const inputData = jobe_input ? document.getElementById(jobe_input).value : '';
+            const outputEl = document.getElementById(jobe_output);
+            
+            outputEl.innerText = "Komunikacja z serwerem Jobe...";
+            
+            const jobeApiUrl = 'https://jobe.otwartaedukacja.pl/jobe/index.php/restapi/runs';
+
+            // Wysyłamy pole sourcecode i input bezpośrednio
+            const payload = {
+                run_spec: {
+                    language_id: "python3",
+                    sourcecode: mainCode,
+                    input: inputData
+                }
+            };
+
+            try {
+                const response = await fetch(jobeApiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Błąd HTTP: ${response.status}`);
+                }
+
+                const result = await response.json();
+                
+                if (result.cmpinfo) {
+                    outputEl.innerText = "BŁĄD KOMPILACJI:\n" + result.cmpinfo;
+                } else if (result.stderr) {
+                    outputEl.innerText = "BŁĄD WYKONANIA:\n" + result.stderr;
+                } else {
+                    outputEl.innerText = result.stdout || "Brak danych na standardowym wyjściu.";
+                }
+                
+            } catch (error) {
+                outputEl.innerText = "Błąd połączenia z serwerem Jobe:\n" + error.message;
+            }
+        }
+    </script>
+</body>
+</html>

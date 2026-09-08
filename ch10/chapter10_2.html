@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>chapter10_2</title>
+    <script src="https://cdn.jsdelivr.net/npm/brython@3.11.3/brython.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/brython@3.11.3/brython_stdlib.js"></script>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, sans-serif; line-height: 1.6; padding: 20px; max-width: 900px; margin: 0 auto; color: #333; }
+        img { max-width: 100%; height: auto; margin: 20px auto; display: block; }
+        .nav-link { display: inline-block; margin-bottom: 20px; text-decoration: none; color: #0056b3; font-weight: bold; border: 1px solid #0056b3; padding: 5px 10px; border-radius: 4px; }
+        .nav-link:hover { background-color: #0056b3; color: white; }
+        
+        /* Style dla widgetów Brythona */
+        .brython-box { background: #f8f9fa; border: 1px solid #ddd; padding: 15px; border-radius: 6px; margin: 20px 0; }
+        .brython-code { width: 100%; font-family: monospace; font-size: 14px; padding: 10px; border: 1px solid #ccc; box-sizing: border-box; }
+        .run-btn { background: #28a745; color: white; border: none; padding: 8px 15px; margin: 10px 0; border-radius: 4px; cursor: pointer; font-weight: bold; }
+        .run-btn:hover { background: #218838; }
+        .brython-output { background: #272822; color: #f8f8f2; padding: 10px; border-radius: 4px; min-height: 40px; font-family: monospace; white-space: pre-wrap; }
+    </style>
+</head>
+<body onload="brython()">
+    <a href="../index.html" class="nav-link">⬅ Wróć do spisu treści</a>
+    <hr>
+<h2>Pickle</h2>
+<p><strong>Przykład 9.3</strong><em>:</em> pickling</p>
+<div class="brython-box">
+    <textarea id="code-1" class="brython-code" rows="20">
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+import pickle
+
+# the name of the file where we will store the object
+trwala_lista_zakupow = 'lista_zakupow.data'
+# lista rzeczy do kupienia
+lista_zakupow = ['jabłka', 'ziemniaki', 'pomidory']
+
+# zapisanie do pliku
+f = open(trwala_lista_zakupow, 'wb')
+pickle.dump(lista_zakupow, f)
+f.close()
+
+# usunięcie zmiennej 'nie-trwałej'
+del lista_zakupow
+
+# odzyskanie zmiennej
+f = open(trwala_lista_zakupow, 'rb')
+lista_zakupow = pickle.load(f)
+for rzecz in lista_zakupow:
+    print(rzecz)</textarea>
+    <br><button class="run-btn" data-idx="1">▶ Uruchom kod</button>
+    <pre id="output-1" class="brython-output"></pre>
+</div>
+
+<p><strong>Objaśnienie</strong>:</p>
+<ul>
+<li>Aby zapisać ‘utrwalane’ dane do pliku, otwieramy go – podobnie jak w poprzednim przykładzie w trybie do zapisu binarnego ('wb' = <em>write – binary</em>).</li>
+<li>Aby odczytać takie dane z pliku, otwieramy plik w trybie do odczytu. Funkcja <strong>pickle.load()</strong> pozwala nam odczytać dokładnie to co zapisaliśmy.</li>
+</ul>
+    <script type="text/python">
+        from browser import document
+        import sys
+
+        # Wspólna przestrzeń nazw dla całej strony (zmienne przeżywają między okienkami)
+        page_namespace = {}
+
+        def run_code(ev):
+            idx = ev.target.attrs["data-idx"]
+            out_element = document[f"output-{idx}"]
+            out_element.text = ""
+            
+            class Pisarz:
+                def write(self, data):
+                    out_element.text += str(data)
+                def flush(self): pass
+            
+            sys.stdout = Pisarz()
+            sys.stderr = Pisarz()
+            
+            kod = document[f"code-{idx}"].value
+            try:
+                exec(kod, page_namespace)
+            except Exception as e:
+                print("BŁĄD:", e)
+
+        # Przypisanie zdarzeń do wszystkich przycisków na stronie
+        for btn in document.select(".run-btn"):
+            btn.bind("click", run_code)
+    </script>
+</body>
+</html>

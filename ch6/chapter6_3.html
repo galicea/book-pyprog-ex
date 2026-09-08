@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>chapter6_3</title>
+    <script src="https://cdn.jsdelivr.net/npm/brython@3.11.3/brython.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/brython@3.11.3/brython_stdlib.js"></script>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, sans-serif; line-height: 1.6; padding: 20px; max-width: 900px; margin: 0 auto; color: #333; }
+        img { max-width: 100%; height: auto; margin: 20px auto; display: block; }
+        .nav-link { display: inline-block; margin-bottom: 20px; text-decoration: none; color: #0056b3; font-weight: bold; border: 1px solid #0056b3; padding: 5px 10px; border-radius: 4px; }
+        .nav-link:hover { background-color: #0056b3; color: white; }
+        
+        /* Style dla widgetów Brythona */
+        .jobe-box { background: #f8f9fa; border: 1px solid #ddd; padding: 15px; border-radius: 6px; margin: 20px 0; }
+        .jobe-code { width: 100%; font-family: monospace; font-size: 14px; padding: 10px; border: 1px solid #ccc; box-sizing: border-box; }
+        .run-btn { background: #28a745; color: white; border: none; padding: 8px 15px; margin: 10px 0; border-radius: 4px; cursor: pointer; font-weight: bold; }
+        .run-btn:hover { background: #218838; }
+        .output-box { background: #272822; color: #f8f8f2; padding: 10px; border-radius: 4px; min-height: 40px; font-family: monospace; white-space: pre-wrap; }
+    </style>
+
+
+
+</head>
+<body onload="brython()">
+    <a href="../index.html" class="nav-link">⬅ Wróć do spisu treści</a>
+    <hr>
+<h2>Moduły</h2>
+<p><strong>Przykład 5.4</strong><em>:</em> cipher.py</p>
+<div class="jobe-box">
+    <textarea id="jobe-module" class="jobe-code" rows="12">
+class TSzyfrant:
+
+    def __init__(self,klucz):
+        self.klucz=klucz
+
+    def szyfruj(self, liczba):
+        return (liczba + self.klucz) % 256
+
+    def odszyfruj(self, liczba):
+        return (256 + liczba - self.klucz) % 256</textarea>
+</div>
+
+<p><strong>Przykład 5.4 c.d</strong><em>.:</em> cipher.py</p>
+<div class="jobe-box">
+    <textarea id="jobe-main" class="jobe-code" rows="10">
+#encoding: UTF-8
+from cipher import TSzyfrant
+
+szyfrant=TSzyfrant(89)
+wiadomosc = int(input('Podaj dodatnią liczbę do zaszyfrowania: '))
+szyfr=szyfrant.szyfruj(wiadomosc)
+print('Wynik=%s' % szyfr)
+print('Odszyfrowany: %s' % szyfrant.odszyfruj(szyfr))</textarea>
+    <br /><textarea id="jobe-input" rows="2">150</textarea><br /><button class="run-btn" onclick="runJobeMultiFile()">▶ Uruchom kod</button>
+    
+    <pre id="jobe-output" class="output-box">Oczekuję na uruchomienie...</pre>
+</div>
+    
+
+    <script>
+// Funkcja pomocnicza do kodowania UTF-8 do Base64
+        function utf8ToBase64(str) {
+            return btoa(unescape(encodeURIComponent(str)));
+        }
+
+        async function runJobeMultiFile() {
+            const moduleCode = document.getElementById('jobe-module').value;
+            const mainCode = document.getElementById('jobe-main').value;
+            const inputData = document.getElementById('jobe-input').value;
+            const outputEl = document.getElementById('jobe-output');
+            
+            outputEl.innerText = "Komunikacja z serwerem Jobe...";
+            
+            const jobeApiUrl = 'https://jobe.otwartaedukacja.pl/jobe/index.php/restapi/runs';
+
+            // Wstrzyknięcie kodu tworzącego moduł przed głównym skryptem czytelnika
+            const injectedCode = `import base64
+with open('cipher.py', 'w', encoding='utf-8') as f:
+    f.write(base64.b64decode('${utf8ToBase64(moduleCode)}').decode('utf-8'))
+
+${mainCode}`;
+
+            // Wysyłamy TYLKO pole sourcecode i input (bez kapryśnego file_list)
+            const payload = {
+                run_spec: {
+                    language_id: "python3",
+                    sourcecode: injectedCode,
+                    input: inputData
+                }
+            };
+
+            try {
+                const response = await fetch(jobeApiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Błąd HTTP: ${response.status}`);
+                }
+
+                const result = await response.json();
+                
+                if (result.cmpinfo) {
+                    outputEl.innerText = "BŁĄD KOMPILACJI:\n" + result.cmpinfo;
+                } else if (result.stderr) {
+                    outputEl.innerText = "BŁĄD WYKONANIA:\n" + result.stderr;
+                } else {
+                    outputEl.innerText = result.stdout || "Brak danych na standardowym wyjściu.";
+                }
+                
+            } catch (error) {
+                outputEl.innerText = "Błąd połączenia z serwerem Jobe:\n" + error.message;
+            }
+        }
+    </script>
+</body>
+</html>

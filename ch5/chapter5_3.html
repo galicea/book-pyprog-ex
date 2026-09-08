@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>chapter5_3</title>
+    <script src="https://cdn.jsdelivr.net/npm/brython@3.11.3/brython.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/brython@3.11.3/brython_stdlib.js"></script>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, sans-serif; line-height: 1.6; padding: 20px; max-width: 900px; margin: 0 auto; color: #333; }
+        img { max-width: 100%; height: auto; margin: 20px auto; display: block; }
+        .nav-link { display: inline-block; margin-bottom: 20px; text-decoration: none; color: #0056b3; font-weight: bold; border: 1px solid #0056b3; padding: 5px 10px; border-radius: 4px; }
+        .nav-link:hover { background-color: #0056b3; color: white; }
+        
+        /* Style dla widgetów Brythona */
+        .brython-box { background: #f8f9fa; border: 1px solid #ddd; padding: 15px; border-radius: 6px; margin: 20px 0; }
+        .brython-code { width: 100%; font-family: monospace; font-size: 14px; padding: 10px; border: 1px solid #ccc; box-sizing: border-box; }
+        .run-btn { background: #28a745; color: white; border: none; padding: 8px 15px; margin: 10px 0; border-radius: 4px; cursor: pointer; font-weight: bold; }
+        .run-btn:hover { background: #218838; }
+        .brython-output { background: #272822; color: #f8f8f2; padding: 10px; border-radius: 4px; min-height: 40px; font-family: monospace; white-space: pre-wrap; }
+    </style>
+</head>
+<body onload="brython()">
+    <a href="../index.html" class="nav-link">⬅ Wróć do spisu treści</a>
+    <hr>
+<h3>Instrukcje break i continue</h3>
+<p><strong>Przykład 4.3</strong><em>:</em> ex_continue</p>
+<div class="brython-box">
+    <textarea id="code-2" class="brython-code" rows="12">
+points = 7 # pierwsza liczba jest ukryta
+counter = points # suma punktow
+print('Możesz zakończyć sumowanie wpisując 0')
+while counter < 21 and points != 0:
+  points = int(input('Wpisz liczbę od 0 do 12: '))
+  if points<0 or points>12:
+    print('Od 0 do 12!')
+    continue
+  counter+= points # dodanie liczby
+print('Suma=%s' % counter)</textarea>
+    <br><button class="run-btn" data-idx="2">▶ Uruchom kod</button>
+    <pre id="output-2" class="brython-output"></pre>
+</div>
+
+<p><strong>Objaśnienie</strong></p>
+<ul>
+<li>To gra w zgadywanie – podobna do pewnej gry karcianej. Ukryta jest pierwsza liczba punktów (points). Podajemy następne uważając, by nie przekroczyć 21. Liczby muszą być od 1 do 12. Dodatkowo 0 kończy grę(gdy grający boi się przegrać i przekroczyć 21). Instrukcja continue jest tu wykorzystana do tego, aby zignorować liczby nie spełniające warunków (0..12).</li>
+<li>Należy pamiętać o tym, że <strong>continue</strong> działa także w pętli <strong>for</strong>.</li>
+<li>W Pythonie 2 funkcja <strong>input()</strong> od razu zwracała wynik jako liczbę (wyrażenie było wyliczane). W Pythonie 3 <strong>input()</strong> zawsze zwraca napis (string), więc trzeba go jawnie przekonwertować funkcją <strong>int</strong>
+</li>
+</ul>
+
+<p><strong>Przykład 4.3</strong><em>:</em> ex_break</p>
+<div class="brython-box">
+    <textarea id="code-4" class="brython-code" rows="16">
+points = 4 # pierwsza liczba jest ukryta
+counter = points # suma punktow
+print('Możesz zakończyć sumowanie wpisując 0')
+while counter < 21:
+  points = int(input('Wpisz liczbę od 0 do 12: '))
+  if points<0 or points>12:
+    print('Od 0 do 12!')
+    continue
+  if points==0: # kończymy grę
+    break
+  counter += points # dodanie liczby
+  if counter>21: # przegrana
+    break
+print('Suma=%s' % counter)</textarea>
+    <br><button class="run-btn" data-idx="4">▶ Uruchom kod</button>
+    <pre id="output-4" class="brython-output"></pre>
+</div>
+
+<p><strong>Objaśnienie</strong></p>
+<blockquote>
+<p>W tym przykładzie mamy dwie sytuacje, w których kończymy pę
+<p>Blok instrukcji w pętli zostaje przerwany, gdy uzyskamy dane czynią bezsensownym dalsze ich przetwarzanie. Może to dotyczyć danych istotnych tylko w tej iteracji – wtedy stosujemy <strong>continue</strong> (dane nie spełniają warunków), albo całej pętli (wychodzimy poza niezmiennik pętli) – wtedy przerywamy (<strong>break</strong>). K każdym razie – zarówna dla <strong>continue</strong> jak i <strong>break</strong> mamy pominięcie reszty bloku, ale <strong>break</strong> dodatkowo powoduje zakończenie całej pętli.</p>
+<p>Pamiętaj, że <strong>break</strong> można stosować także w pętli <strong>for</strong>.</p>
+    <script type="text/python">
+        from browser import document
+        import sys
+
+        # Wspólna przestrzeń nazw dla całej strony (zmienne przeżywają między okienkami)
+        page_namespace = {}
+
+        def run_code(ev):
+            idx = ev.target.attrs["data-idx"]
+            out_element = document[f"output-{idx}"]
+            out_element.text = ""
+            
+            class Pisarz:
+                def write(self, data):
+                    out_element.text += str(data)
+                def flush(self): pass
+            
+            sys.stdout = Pisarz()
+            sys.stderr = Pisarz()
+            
+            kod = document[f"code-{idx}"].value
+            try:
+                exec(kod, page_namespace)
+            except Exception as e:
+                print("BŁĄD:", e)
+
+        # Przypisanie zdarzeń do wszystkich przycisków na stronie
+        for btn in document.select(".run-btn"):
+            btn.bind("click", run_code)
+    </script>
+</body>
+</html>

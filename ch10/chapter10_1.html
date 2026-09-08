@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>chapter10_1</title>
+    <script src="https://cdn.jsdelivr.net/npm/brython@3.11.3/brython.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/brython@3.11.3/brython_stdlib.js"></script>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, sans-serif; line-height: 1.6; padding: 20px; max-width: 900px; margin: 0 auto; color: #333; }
+        img { max-width: 100%; height: auto; margin: 20px auto; display: block; }
+        .nav-link { display: inline-block; margin-bottom: 20px; text-decoration: none; color: #0056b3; font-weight: bold; border: 1px solid #0056b3; padding: 5px 10px; border-radius: 4px; }
+        .nav-link:hover { background-color: #0056b3; color: white; }
+        
+        /* Style dla widgetów Jobe */
+        .jobe-box { background: #f8f9fa; border: 1px solid #ddd; padding: 15px; border-radius: 6px; margin: 20px 0; }
+        .jobe-code { width: 100%; font-family: monospace; font-size: 14px; padding: 10px; border: 1px solid #ccc; box-sizing: border-box; }
+        .run-btn { background: #28a745; color: white; border: none; padding: 8px 15px; margin: 10px 0; border-radius: 4px; cursor: pointer; font-weight: bold; }
+        .run-btn:hover { background: #218838; }
+        .output-box { background: #272822; color: #f8f8f2; padding: 10px; border-radius: 4px; min-height: 40px; font-family: monospace; white-space: pre-wrap; }
+    </style>
+</head>
+<body>
+    <a href="../index.html" class="nav-link">⬅ Wróć do spisu treści</a>
+    <hr>
+
+<h2>Pliki</h2>
+<p><strong>Przykład 9.1</strong><em>:</em> pliki</p>
+<div class="jobe-box">
+    <textarea id="code-1" class="jobe-code" rows="20">
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+wierszyk = '''\
+Programming is fun
+When the work is done
+if you wanna make your work also fun:
+    use Python!
+'''
+
+f1 = open('wierszyk.txt', 'w')
+            # 'w' oznacza, że będziemy pisać do pliku
+f1.write(wierszyk)
+f1.flush()       # zapisanie zmian w pliku na dysk
+
+f2 = open('wierszyk.txt')
+            # brak drugiego argumentu oznacza 'tylko odczyt'
+for wers in f2:
+  print(wers)
+</textarea>
+    <br><button class="run-btn" data-idx="1" 
+    onclick="runJobeMultiFile('code-1','','jobe-output-1')">▶ Uruchom kod</button>
+    <pre id="jobe-output-1" class="output-box"></pre>
+</div>
+
+<p><strong>Objaśnienie:</strong></p>
+<ul>
+<li>Tworzymy plik wierszyk.txt otwierając go w trybie do zapisu (z argumentem 'w'). Jeśli plik o takiej nazwie jeszcze nie istniał, to zostaje on utworzony z pustą zawartością. Jeśli już istniał, to jego zawartość zostaje skasowana (jeśli chcemy dopisać treść na końcu nie kasując zawartości, to zamiast parametru ‘w’ powinniśmy użyć parametru ‘a’). Do tego pliku zapisujemy tekst podzielony na wiersze.</li>
+<li>Następnie otwieramy ten sam plik ponownie, tym razem w trybie do odczytu. Następnie linijka po linijce odczytujemy plik i wypisujemy każdą linijkę.</li>
+</ul>
+<p>Program jest bardzo prosty, ale jest tu parę drobiazgów na które warto zwrócić uwagę:</p>
+<ul>
+<li>Zmienna wierszyk jest wielowierszowym ciągiem znaków. W Pythonie takie teksty tworzymy przez użycie potrójnego
+  apostrofu (''') jako ogranicznika.</li>
+<li>Bezpośrednio po otwarciu tego napisu jest użyty znak   kontynuacji ‘\’.  Gdyby go nie było, napis zawierałby
+  dodatkową pustą linijkę na samym początku.</li>
+<li>Zapis danych na dysk nie następuje natychmiast, ale dopiero wtedy, gdy uzbiera się ich większa ilość. Dlatego na końcu powinno się wykonać operację odwrotną do otwarcia: close.
+  Zapisuje ona wszystkie dane na dysk i kasuje obiekt pliku.
+  Jeśli chcemy zacząć odczytywać ten plik bez zamykania - musimy się upewnić, że nasze zmiany naprawdę znalazły się na dysku. Służy do tego metoda <strong>flush</strong>.</li>
+<li>Gdybyśmy nie wywołali flush, to zmiany w pliku i tak zostałyby zapisane automatycznie najpóźniej
+  w momencie zakończenia programu. Gdy program kończy swoje
+  działanie, wszystkie zmiany są zapisywane i pliki są zamykane
+  przez system operacyjny.</li>
+<li>Iteracja po obiekcie file oznacza iterację po linijkach (for otrzymuje kolejne linijki).</li>
+</ul>
+
+<p><strong>Przykład 9.2</strong><em>:</em> bpliki</p>
+<div class="jobe-box">
+    <textarea id="code-2" class="jobe-code" rows="20">
+#!/usr/bin/env python
+
+import os
+
+f1=open('plik1.txt','w')
+buf='3334'
+f1.write(buf)
+f1.close()
+
+from struct import *
+f2=open('plik2.dat','wb')
+buf=pack('hh', 33,34)
+f2.write(buf)
+f2.close()
+
+fin = open("plik2.dat", "rb")
+bufin = fin.read(4)
+print(unpack('hh',bufin))
+fin.seek(2)
+print(unpack('h',fin.read(2)))
+
+fin.close()</textarea>
+    <br />
+    <textarea id="jobe-input-2" rows="2" style="width: 100%; box-sizing: border-box;" placeholder="Standardowe wejście (opcjonalne)"></textarea>
+    <br />
+    <button class="run-btn" onclick="runJobeMultiFile('code-2','jobe-input-2','jobe-output-2')">▶ Uruchom kod</button>
+    <br />
+    <pre id="jobe-output-2" class="output-box"></pre>
+</div>
+
+<p><strong>Objaśnienie</strong></p>
+<ul>
+<li>Funkcja <strong>pack</strong> tworzy bufor danych, który może być zapisywany do pliku binarnego (funkcją write dla obiektu file) – identycznie jak do plików tekstowych zapisuje się napisy (string). Pierwszy parametr funkcji <strong>pack</strong> zawiera określenie jakiego rodzaju dane mają być pakowane – zgodnie ze wskazaną wcześniej tabelką (h oznacza małą liczbę całkowitą – short integer). Po nim następują dane do upakowania.</li>
+<li>Odczytując dane binarne musimy podać ilość danych do odczytania. Następny odczyt odbywa się od miejsca, gdzie skończył się poprzedni. Mówi się czasem o wskaźniku pliku – jako wskazaniu na miejsce odczytu/zapisu. Można dzięki temu do jednego pliku pisać i czytać wiele danych binarnych. Taki sekwencyjny (jeden po drugim) odczyt danych może dla dużych plików być nieefektywny (gdy chcemy odczytać dane nie zapisane na samym początku pliku). Dlatego dla plików na dysku wprowadzono przesuwanie wskaźnika funkcją seek. W naszym przykładzie seek(2) oznacza przejście do 3-go bajtu liczonego od początku pliku.</li>
+<li>Literka ‘b’ dodana do parametru określającego tryb otwarcia pliku (‘wb’ zamiast ‘w’ oraz ‘rb’ zamiast ‘b’) oznacza, że chcemy zapisywać / odczytywać dane binarne. W przypadku Pythona 2.x w zasadzie ta różnica jest bez znaczenia (ale jest akceptowana), ale w Pythonie 3 jest istotna.</li>
+</ul>
+
+    <script>
+        // Funkcja pomocnicza do kodowania UTF-8 do Base64
+        function utf8ToBase64(str) {
+            return btoa(unescape(encodeURIComponent(str)));
+        }
+
+        async function runJobeMultiFile(jobe_main, jobe_input, jobe_output) {
+            
+            const mainCode = document.getElementById(jobe_main).value;
+            const inputData = jobe_input ? document.getElementById(jobe_input).value : '';
+            const outputEl = document.getElementById(jobe_output);
+            
+            outputEl.innerText = "Komunikacja z serwerem Jobe...";
+            
+            const jobeApiUrl = 'https://jobe.otwartaedukacja.pl/jobe/index.php/restapi/runs';
+
+            // Wysyłamy pole sourcecode i input bezpośrednio
+            const payload = {
+                run_spec: {
+                    language_id: "python3",
+                    sourcecode: mainCode,
+                    input: inputData
+                }
+            };
+
+            try {
+                const response = await fetch(jobeApiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Błąd HTTP: ${response.status}`);
+                }
+
+                const result = await response.json();
+                
+                if (result.cmpinfo) {
+                    outputEl.innerText = "BŁĄD KOMPILACJI:\n" + result.cmpinfo;
+                } else if (result.stderr) {
+                    outputEl.innerText = "BŁĄD WYKONANIA:\n" + result.stderr;
+                } else {
+                    outputEl.innerText = result.stdout || "Brak danych na standardowym wyjściu.";
+                }
+                
+            } catch (error) {
+                outputEl.innerText = "Błąd połączenia z serwerem Jobe:\n" + error.message;
+            }
+        }
+    </script>
+</body>
+</html>

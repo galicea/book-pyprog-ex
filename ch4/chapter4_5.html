@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>chapter4_5</title>
+    <script src="https://cdn.jsdelivr.net/npm/brython@3.11.3/brython.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/brython@3.11.3/brython_stdlib.js"></script>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, sans-serif; line-height: 1.6; padding: 20px; max-width: 900px; margin: 0 auto; color: #333; }
+        img { max-width: 100%; height: auto; margin: 20px auto; display: block; }
+        .nav-link { display: inline-block; margin-bottom: 20px; text-decoration: none; color: #0056b3; font-weight: bold; border: 1px solid #0056b3; padding: 5px 10px; border-radius: 4px; }
+        .nav-link:hover { background-color: #0056b3; color: white; }
+        
+        /* Style dla widgetów Brythona */
+        .brython-box { background: #f8f9fa; border: 1px solid #ddd; padding: 15px; border-radius: 6px; margin: 20px 0; }
+        .brython-code { width: 100%; font-family: monospace; font-size: 14px; padding: 10px; border: 1px solid #ccc; box-sizing: border-box; }
+        .run-btn { background: #28a745; color: white; border: none; padding: 8px 15px; margin: 10px 0; border-radius: 4px; cursor: pointer; font-weight: bold; }
+        .run-btn:hover { background: #218838; }
+        .brython-output { background: #272822; color: #f8f8f2; padding: 10px; border-radius: 4px; min-height: 40px; font-family: monospace; white-space: pre-wrap; }
+    </style>
+</head>
+<body onload="brython()">
+    <a href="../index.html" class="nav-link">⬅ Wróć do spisu treści</a>
+    <hr>
+<h2>Krotki</h2>
+<p><em>Przykład 3.3:</em> using_tuple</p>
+<div class="brython-box">
+    <textarea id="code-2" class="brython-code" rows="12">
+zoo = ('python', 'elephant', 'penguin')
+print('Ilość zwierząt w ZOO =%s' % len(zoo))
+new_zoo = 'monkey', 'camel', zoo
+print(u'W nowym ZOO są zwierzęta:')
+print(new_zoo)
+print(u'razem %s miejsca' %  len(new_zoo))
+print(u'Zwierzęta nabyte ze starego zoo:')
+print(new_zoo[2])
+print(u'Ostatnie zwierzę ze starego zoo to %s' % new_zoo[2][2])
+print(u'Ilość zwierząt w nowym zoo: ', len(new_zoo)-1+len(new_zoo[2]))</textarea>
+    <br><button class="run-btn" data-idx="2">▶ Uruchom kod</button>
+    <pre id="output-2" class="brython-output"></pre>
+</div>
+
+<p><strong>Objaśnienie</strong></p>
+<ul>
+<li>Zmienna <code>zoo</code> zawiera elementy krotki. Widzimy, że funkcja <code>len</code> podobnie jak w przypadku list zwraca ilość elementów. Podobnie jak listy – krotki mogą być użyte jako sekwencja przeglądana w pętli for.</li>
+<li>Po likwidacji starego ZOO zwierzęta zostały przeniesione do oddzielnej lokalizacji w nowym ZOO. Zainicjowanie zmiennej <code>new_zoo</code> twory nową krotkę zawierającą dwa nowe zwierzęta, a w trzecim elemencie  krotki – dane o zwierzętach ze starego ZOO. Ta operacja wymaga kilku słów komentarza:</li>
+<li>Pominięto w niej nawiasy – gdyż one są przy tworzeniu krotek opcjonalne (niemniej zachęca się do ich stosowania)  wyrażenie  a=1,2,3,4 jest równoważne   a=(1,2,3,4) – można się o tym przekonać wykonując druk (print) a lub a.<strong>class</strong>.</li>
+<li>Możliwość umieszczania struktury w strukturze pozwala tworzyć listy list (zamiast tablic wielowymiarowych) i inne złożone struktury. Funkcja len liczy ilość elementów struktury podanej w parametrze – a wewnętrzne struktury są traktowane jak jeden element. Dlatego len(new_zoo) zwraca 3 – choć ilość zwierząt jest większa.</li>
+<li>Podobnie jak w przypadku list, możemy uzyskać dostęp do elementów w krotce określając pozycję elementu numerem podanym w parze nawiasów kwadratowych. Jest to tak zwany operator <em>indeksowania</em> ** Trzeci elementu w <code>new_zoo</code> ma indeks 2 (liczymy od 0) i możemy odwołać się do niego pisząc  <code>new_zoo[2].</code> Trzecia pozycja w tym trzecim elemencie (zwierzęta ze starego ZOO) to <code>new_zoo[2][2]</code>.</li>
+</ul>
+
+
+<script type="text/python">
+        from browser import document
+        import sys
+
+        # Wspólna przestrzeń nazw dla całej strony (zmienne przeżywają między okienkami)
+        page_namespace = {}
+
+        def run_code(ev):
+            idx = ev.target.attrs["data-idx"]
+            out_element = document[f"output-{idx}"]
+            out_element.text = ""
+            
+            class Pisarz:
+                def write(self, data):
+                    out_element.text += str(data)
+                def flush(self): pass
+            
+            sys.stdout = Pisarz()
+            sys.stderr = Pisarz()
+            
+            kod = document[f"code-{idx}"].value
+            try:
+                exec(kod, page_namespace)
+            except Exception as e:
+                print("BŁĄD:", e)
+
+        # Przypisanie zdarzeń do wszystkich przycisków na stronie
+        for btn in document.select(".run-btn"):
+            btn.bind("click", run_code)
+    </script>
+</body>
+</html>

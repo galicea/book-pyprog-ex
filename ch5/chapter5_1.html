@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>chapter5_1</title>
+    <script src="https://cdn.jsdelivr.net/npm/brython@3.11.3/brython.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/brython@3.11.3/brython_stdlib.js"></script>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, sans-serif; line-height: 1.6; padding: 20px; max-width: 900px; margin: 0 auto; color: #333; }
+        img { max-width: 100%; height: auto; margin: 20px auto; display: block; }
+        .nav-link { display: inline-block; margin-bottom: 20px; text-decoration: none; color: #0056b3; font-weight: bold; border: 1px solid #0056b3; padding: 5px 10px; border-radius: 4px; }
+        .nav-link:hover { background-color: #0056b3; color: white; }
+        
+        /* Style dla widgetów Brythona */
+        .brython-box { background: #f8f9fa; border: 1px solid #ddd; padding: 15px; border-radius: 6px; margin: 20px 0; }
+        .brython-code { width: 100%; font-family: monospace; font-size: 14px; padding: 10px; border: 1px solid #ccc; box-sizing: border-box; }
+        .run-btn { background: #28a745; color: white; border: none; padding: 8px 15px; margin: 10px 0; border-radius: 4px; cursor: pointer; font-weight: bold; }
+        .run-btn:hover { background: #218838; }
+        .brython-output { background: #272822; color: #f8f8f2; padding: 10px; border-radius: 4px; min-height: 40px; font-family: monospace; white-space: pre-wrap; }
+    </style>
+</head>
+<body onload="brython()">
+    <a href="../index.html" class="nav-link">⬅ Wróć do spisu treści</a>
+    <hr>
+<h2>Instrukcja warunkowa (if)</h2>
+<p><strong>Przykład 4.1</strong><em>:</em> ex_if</p>
+<div class="brython-box">
+    <textarea id="code-1" class="brython-code" rows="18">
+number = 23
+guess = int(input('Podaj liczbę całkowitą: '))
+if guess == number:
+  # Blok warunkowy zaczyna się w tym miejscu
+  print('Gartulacje, zgadłeś liczbę.')
+  print('(ale niestety nie ma żadnej nagrody!)')
+  # Tu kończy się blok warunkowy
+elif guess < number:
+  # Drugi blok
+  print('Nie, liczba powinna być większa')
+  # Koniec drugiego bloku ...
+else:
+  print('Nie, liczba powinna być mniejsza')
+  # ten blok zostanie wykonany tylko gdy guessed > number
+print('Koniec')
+# Ostatnia instrukcja (print) jest wykonywana zawsze - po zakończeniu instrukcji warunkowej.</textarea>
+    <br><button class="run-btn" data-idx="1">▶ Uruchom kod</button>
+    <pre id="output-1" class="brython-output"></pre>
+</div>
+
+<p><strong>Objaśnienie</strong></p>
+<blockquote>
+    <p>W tym przykładzie program pyta użytkownika o liczbę całkowitą i sprawdza, czy jest ona równa liczbie zapamiętanej w zmiennej <strong>number</strong>. W zależności od wyniku porównania, program wykonuje różne bloki instrukcji.</p>
+<p>Program pozwala na wprowadzanie liczby od użytkownika (funkcją <strong>input()</strong> ) i sprawdzanie, czy zgadł on liczbę zapisana w pamięci zmienna number). Następnie w zależności od tego, czy wprowadzono liczbę zapamiętaną (23), mniejszą lub większą – wykona si inny blok instrukcji.</p>
+<p>Funkcja wbudowana <strong>input</strong> drukuje na ekranie parametr i czeka na dane zakończone klawiszem Enter. Następnie <strong>input()</strong> zwraca wprowadzony ciąg znaków.</p>
+<p>W programie ciąg znakow jest konwertowany do liczby (za pomocą <strong>int</strong>) i zapisywany do zmiennej <strong>guess</strong> (zgadywanie).</p>
+<p>Sprawdzane wyrażenia logiczne to porównywanie liczb zapamiętanych w zmiennych numer i guess.</p>
+<p>Bloki instrukcji są zaznaczane poprzez wcięcia (spacje z lewej).</p>
+<p>Zauważ, że <strong>if</strong> sprawozdanie zawiera dwukropek na końcu - jesteśmy wskazując Pythonie, że blok sprawozdania następuje.</p>
+<p>W programie użyto słowa kluczowego <strong>elif</strong>. Jest to skrót od dwóch słów: <strong>else-if</strong> i działa właśnie tak – jako ich połączenie. Dzięki temu zmniejsza się ilość wymaganych wcięć (porównaj ten sam tekst po zamianie <strong>elif</strong> na <strong>else</strong>:  <strong>if</strong> ….).</p>
+</blockquote>
+  <script type="text/python">
+        from browser import document
+        import sys
+
+        # Wspólna przestrzeń nazw dla całej strony (zmienne przeżywają między okienkami)
+        page_namespace = {}
+
+        def run_code(ev):
+            idx = ev.target.attrs["data-idx"]
+            out_element = document[f"output-{idx}"]
+            out_element.text = ""
+            
+            class Pisarz:
+                def write(self, data):
+                    out_element.text += str(data)
+                def flush(self): pass
+            
+            sys.stdout = Pisarz()
+            sys.stderr = Pisarz()
+            
+            kod = document[f"code-{idx}"].value
+            try:
+                exec(kod, page_namespace)
+            except Exception as e:
+                print("BŁĄD:", e)
+
+        # Przypisanie zdarzeń do wszystkich przycisków na stronie
+        for btn in document.select(".run-btn"):
+            btn.bind("click", run_code)
+    </script>
+</body>
+</html>

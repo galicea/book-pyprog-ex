@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>chapter7_1</title>
+    <script src="https://cdn.jsdelivr.net/npm/brython@3.11.3/brython.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/brython@3.11.3/brython_stdlib.js"></script>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, sans-serif; line-height: 1.6; padding: 20px; max-width: 900px; margin: 0 auto; color: #333; }
+        img { max-width: 100%; height: auto; margin: 20px auto; display: block; }
+        .nav-link { display: inline-block; margin-bottom: 20px; text-decoration: none; color: #0056b3; font-weight: bold; border: 1px solid #0056b3; padding: 5px 10px; border-radius: 4px; }
+        .nav-link:hover { background-color: #0056b3; color: white; }
+        
+        /* Style dla widgetów Brythona */
+        .brython-box { background: #f8f9fa; border: 1px solid #ddd; padding: 15px; border-radius: 6px; margin: 20px 0; }
+        .brython-code { width: 100%; font-family: monospace; font-size: 14px; padding: 10px; border: 1px solid #ccc; box-sizing: border-box; }
+        .run-btn { background: #28a745; color: white; border: none; padding: 8px 15px; margin: 10px 0; border-radius: 4px; cursor: pointer; font-weight: bold; }
+        .run-btn:hover { background: #218838; }
+        .brython-output { background: #272822; color: #f8f8f2; padding: 10px; border-radius: 4px; min-height: 40px; font-family: monospace; white-space: pre-wrap; }
+    </style>
+</head>
+<body onload="brython()">
+    <a href="../index.html" class="nav-link">⬅ Wróć do spisu treści</a>
+    <hr>
+<h2>Sekwencje</h2>
+<p><em>Przykład 6.1:</em> slices</p>
+<div class="brython-box">
+    <textarea id="code-1" class="brython-code" rows="10">
+print([0,1,2,3,4])
+print([0,1,2,3,4][1])
+print([0,1,2,3,4][-1])
+print([0,1,2,3,4][1:3])
+print([0,1,2,3,4][:3])
+print([0,1,2,3,4][1:3])
+print([0,1,2,3,4][-1])
+print([0,1,2,3,4][1:-1])</textarea>
+    <br><button class="run-btn" data-idx="1">▶ Uruchom kod</button>
+    <pre id="output-1" class="brython-output"></pre>
+</div>
+
+<p><strong>Objaśnienie</strong></p>
+<blockquote>Należy zwrócić uwagę na to, że pominięcie ograniczenia górnego lub dolnego sekwencji (na przykład [:3] nie ma dolnego ograniczenia) powoduje wzięcie sekwencji od początku lub do końca.</blockquote>
+<p><strong>Przykład 6.2</strong><em>:</em> seq</p>
+<div class="brython-box">
+    <textarea id="code-2" class="brython-code" rows="20">
+shoplist = ['jabłko', 'mango', 'marchew', 'banan']
+name = 'Galicea'
+#
+print('lista zawiera chleb?', 'chleb' in shoplist)
+print('lista zawiera banan?', 'banan' in shoplist)
+# indeksowanie #
+print('Element 0 to % s' % shoplist[0])
+print('Element 1 to % s' % shoplist[1])
+print('Element 2 to % s' % shoplist[2])
+print('Element 3 to % s' % shoplist[3])
+print('Element -1 to % s' % shoplist[-1])
+print('Element -2 to % s' % shoplist[-2])
+print('Znak 0 to % s' % name[0])
+# fragmenty listy #
+print('Elementy od 1 do 3 to %s' %  shoplist[1:3])
+print('Elementy od 2 do końca to %s' % shoplist[2:])
+print('Elementy od 1 do -1 to %s' % shoplist[1:-1])
+print('Elementy od początku do końca to %s' % shoplist[:])
+# fragmenty łańcucha #
+print('znaki od 1 do 3 to %s' % name[1:3])
+print('znaki od 2 do końca to %s' % name[2:])
+print('znaki od 1 do -1 to %s' % name[1:-1])
+print('znaki od początku do końca to %s' % name[:])</textarea>
+    <br><button class="run-btn" data-idx="2">▶ Uruchom kod</button>
+    <pre id="output-2" class="brython-output"></pre>
+</div>
+
+<p><strong>Objaśnienie</strong></p>
+<blockquote>Python numeruje sekwencje od 0 – dlatego shoplist[0] to pierwsza, a shoplist[3] – czwarta pozycja w shoplist.</blockquote>
+
+    <script type="text/python">
+        from browser import document
+        import sys
+
+        # Wspólna przestrzeń nazw dla całej strony (zmienne przeżywają między okienkami)
+        page_namespace = {}
+
+        def run_code(ev):
+            idx = ev.target.attrs["data-idx"]
+            out_element = document[f"output-{idx}"]
+            out_element.text = ""
+            
+            class Pisarz:
+                def write(self, data):
+                    out_element.text += str(data)
+                def flush(self): pass
+            
+            sys.stdout = Pisarz()
+            sys.stderr = Pisarz()
+            
+            kod = document[f"code-{idx}"].value
+            try:
+                exec(kod, page_namespace)
+            except Exception as e:
+                print("BŁĄD:", e)
+
+        # Przypisanie zdarzeń do wszystkich przycisków na stronie
+        for btn in document.select(".run-btn"):
+            btn.bind("click", run_code)
+    </script>
+</body>
+</html>

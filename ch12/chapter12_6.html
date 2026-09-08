@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>chapter12_6</title>
+    <script src="https://cdn.jsdelivr.net/npm/brython@3.11.3/brython.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/brython@3.11.3/brython_stdlib.js"></script>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, sans-serif; line-height: 1.6; padding: 20px; max-width: 900px; margin: 0 auto; color: #333; }
+        img { max-width: 100%; height: auto; margin: 20px auto; display: block; }
+        .nav-link { display: inline-block; margin-bottom: 20px; text-decoration: none; color: #0056b3; font-weight: bold; border: 1px solid #0056b3; padding: 5px 10px; border-radius: 4px; }
+        .nav-link:hover { background-color: #0056b3; color: white; }
+        
+        /* Style dla widgetów */
+        .static-box { background: #e9ecef; border: 1px solid #ced4da; padding: 15px; border-radius: 6px; margin: 20px 0; }
+        .brython-box { background: #f8f9fa; border: 1px solid #ddd; padding: 15px; border-radius: 6px; margin: 20px 0; }
+        .brython-code { width: 100%; font-family: monospace; font-size: 14px; padding: 10px; border: 1px solid #ccc; box-sizing: border-box; }
+        .run-btn { background: #28a745; color: white; border: none; padding: 8px 15px; margin: 10px 0; border-radius: 4px; cursor: pointer; font-weight: bold; }
+        .run-btn:hover { background: #218838; }
+        .brython-output { background: #272822; color: #f8f8f2; padding: 15px; border-radius: 4px; min-height: 50px; font-family: monospace; white-space: pre-wrap; }
+    </style>
+</head>
+<body onload="brython()">
+    <a href="../index.html" class="nav-link">⬅ Wróć do spisu treści</a>
+    <hr>
+    
+<h2>Zdarzenia</h2>
+<p><strong>Przykład 11.3</strong><em>:</em> wx_app (Kod do uruchomienia lokalnie na komputerze)</p>
+
+<div class="static-box">
+    <pre style="margin: 0;"><code style="font-family: monospace; font-size: 14px;">
+#!/usr/bin/env python
+import wx
+
+class TestApp(wx.App):
+  def OnInit(self):
+    frame = wx.Frame(None, -1, "Tytul okna")
+    frame.Show(True)
+    panel = wx.Panel(frame, -1)
+    self.label1 = wx.StaticText(panel, -1, "Etykieta")
+
+    button1 = wx.Button(panel, id=wx.ID_ANY,
+          label="Kliknij", pos=(225, 5), size=(80, 25))
+    button1.Bind(wx.EVT_BUTTON, self.onButton1Click)
+
+    frame.panel = panel
+    self.SetTopWindow(frame)
+    return True
+
+  def onButton1Click(self, event):
+    self.label1.SetLabel("Button pressed!")
+
+app = TestApp(0)
+app.MainLoop()</code></pre>
+</div>
+
+<p><strong>Objaśnienie</strong></p>
+<p>Kontrolkę przycisku tworzymy wykorzystując klasę wx.Button. W parametrach podajemy między innymi (opcjonalnie) pozycję  (pos) i rozmiar (size).</p>
+<p>W implementacji obiektu aplikacji pojawiała się metoda onButton1Click, która jest odpowiedzialna za obsługę zdarzenia. Wiążemy tą metodę ze zdarzeniami dotyczącymi przycisku metodą <strong>Bind</strong>:</p>
+<p><code>button1.Bind(wx.EVT_BUTTON, self.onButton1Click)</code></p>
+<p>Wewnątrz funkcji onButton1Click zaimplementowana została zmiana etykiety label1. Aby ułatwić odwołanie do etykiety, została ona zainicjowana jako własność obiektu (użycie przedrostka self).</p>
+
+<hr>
+
+<!-- Nowy blok z kodem Brython DOM -->
+<h3>Wersja przeglądarkowa (Brython DOM)</h3>
+<p>Poniżej znajduje się ten sam program, ale zamiast <code>wxPython</code> używa obiektów przeglądarki (DOM). Możesz go uruchomić bezpośrednio tutaj!</p>
+
+<div class="brython-box">
+    <textarea id="code-2" class="brython-code" rows="27">
+from browser import document, html
+
+class TestApp:
+    def __init__(self, target_id):
+        # Pobieramy nasz "Panel" (okienko wyniku) na stronie HTML
+        self.panel = document[target_id]
+        
+        # Tworzymy etykietę (odpowiednik wx.StaticText)
+        self.label1 = html.SPAN("Etykieta", style={"marginRight": "15px"})
+        
+        # Tworzymy przycisk (odpowiednik wx.Button)
+        button1 = html.BUTTON("Kliknij")
+        
+        # Podpinamy zdarzenie (odpowiednik Bind)
+        button1.bind("click", self.onButton1Click)
+        
+        # Dodajemy kontrolki do panelu
+        self.panel <= self.label1
+        self.panel <= button1
+
+    def onButton1Click(self, event):
+        # Odpowiednik SetLabel
+        self.label1.text = "Button pressed!"
+
+# Uruchamiamy aplikację, wskazując identyfikator pola wynikowego
+app = TestApp("output-2")
+</textarea>
+    <br><button class="run-btn" data-idx="2">▶ Uruchom kod (Brython)</button>
+    <!-- Element div zamiast pre, bo wrzucamy do niego prawdziwe przyciski z HTML -->
+    <div id="output-2" class="brython-output">Tu pojawi się wygenerowany interfejs...</div>
+</div>
+
+    <script type="text/python">
+        from browser import document
+        import sys
+
+        page_namespace = {}
+
+        def run_code(ev):
+            idx = ev.target.attrs["data-idx"]
+            out_element = document[f"output-{idx}"]
+            # Czyszczenie poprzedniej zawartości okienka
+            out_element.clear()
+            
+            class Pisarz:
+                def write(self, data):
+                    out_element <= data
+                def flush(self): pass
+            
+            sys.stdout = Pisarz()
+            sys.stderr = Pisarz()
+            
+            kod = document[f"code-{idx}"].value
+            try:
+                exec(kod, page_namespace)
+            except Exception as e:
+                print("BŁĄD:", e)
+
+        for btn in document.select(".run-btn"):
+            btn.bind("click", run_code)
+    </script>
+</body>
+</html>

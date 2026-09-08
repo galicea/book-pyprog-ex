@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>chapter10_1</title>
+    <script src="https://cdn.jsdelivr.net/npm/brython@3.11.3/brython.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/brython@3.11.3/brython_stdlib.js"></script>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, sans-serif; line-height: 1.6; padding: 20px; max-width: 900px; margin: 0 auto; color: #333; }
+        img { max-width: 100%; height: auto; margin: 20px auto; display: block; }
+        .nav-link { display: inline-block; margin-bottom: 20px; text-decoration: none; color: #0056b3; font-weight: bold; border: 1px solid #0056b3; padding: 5px 10px; border-radius: 4px; }
+        .nav-link:hover { background-color: #0056b3; color: white; }
+        
+        /* Style dla widgetów Jobe */
+        .jobe-box { background: #f8f9fa; border: 1px solid #ddd; padding: 15px; border-radius: 6px; margin: 20px 0; }
+        .jobe-code { width: 100%; font-family: monospace; font-size: 14px; padding: 10px; border: 1px solid #ccc; box-sizing: border-box; }
+        .run-btn { background: #28a745; color: white; border: none; padding: 8px 15px; margin: 10px 0; border-radius: 4px; cursor: pointer; font-weight: bold; }
+        .run-btn:hover { background: #218838; }
+        .output-box { background: #272822; color: #f8f8f2; padding: 10px; border-radius: 4px; min-height: 40px; font-family: monospace; white-space: pre-wrap; }
+    </style>
+</head>
+<body>
+    <a href="../index.html" class="nav-link">⬅ Wróć do spisu treści</a>
+    <hr>
+
+<h2>Bazy danych</h2>
+<p><strong>Przykład 9.4</strong><em>:</em> sqlite</p>
+<div class="jobe-box">
+<textarea id="code-1" class="jobe-code" rows="50">
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+import os
+import sqlite3
+
+def connect_db():
+    # przylaczenie bazy danych
+    db = sqlite3.connect('test.db')
+    return db
+
+def ini_db():
+    try:
+        db = connect_db()
+        cur = db.cursor()
+        cur.executescript('''\
+CREATE TABLE "user" (
+  "id" INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+  "username" TEXT,
+  "password" TEXT
+);
+        ''')
+        db.commit()
+    except sqlite3.Error as e:
+        print("DB error:", e.args[0])
+    except Error as e:
+        print("rror:", e.args[0])
+
+def new_user(db, name, password):
+    try:
+        cursor = db.cursor()
+        cursor.executescript("insert into user(username, password) values ('%s','%s')" % (name, password))
+        # nie powoduje błędu z O'Connor:
+        #   cursor.execute("insert into user(username, password) values (?,?)" , (name, password))
+        db.commit()
+    except sqlite3.Error as e:
+        print("DB error:", e.args[0])
+        print('nieudane  wstawienie %s ', name)
+
+ini_db()
+db=connect_db()
+new_user(db, 'Tomek','haslotomka')
+new_user(db, 'Tomek','haslotomka')
+new_user(db, "O''Connor",'haslo2')
+new_user(db, 'Romek','hasloromka')
+
+cursor = db.cursor()
+for (id, username, password) in cursor.execute('select id, username, password from user'):
+    print('%s %s:%s' % (id, username, password))
+</textarea>
+    <br><button class="run-btn" data-idx="1" 
+    onclick="runJobeMultiFile('code-1','','jobe-output-1')">▶ Uruchom kod</button>
+    <pre id="jobe-output-1" class="output-box"></pre>
+</div>
+
+
+<p><strong>Objaśnienie:</strong></p>
+<ul>
+<li>Istnieje wiele różnych baz danych. Powyższy przykład dotyczy najprostszej z nich: SQLite. Dane są pamiętane w przypadku tej bazy w jednym pliku. W przypadku bardziej zaawansowanych baz danych komunikacja odbywa się za pośrednictwem sieci. Dla SQLite potrzebny jest tylko odpowiedni moduł – w przypadku Pythona jest to sqlite3.</li>
+<li>Połączenie z bazą danych (funkcja connect) ustala zazwyczaj jedynie parametry komunikacji. W przypadku SQLite polecenie sqlite3.connect('test.db') tworzy bazę – o ile wcześniej ona nie istniała.</li>
+<li>Komunikacja z bazą odbywa się z użyciem języka SQL. Polecenia nie są przesyłane wprost poprzez obiekt połączenia (db w powyższym przykładzie), ale przez obiekt kursora (ang. cursor). Umożliwia to  stworzenie wielu kursorów dla jednej bazy – na przykład dwa kursory do przeglądania równolegle dwóch tabel.</li>
+<li>Do wysłania polecenia SQL można użyć funkcji  executescript lub execute. W tym drugim przypadku jako wynik funkcji dostajemy rezultat zapytania w postacie generowanych wierszy.</li>
+<li>Polecenie  SQL ‘CREATE TABLE "user" … ‘ tworzy tabelę o nazwie „user”. Polecenie ‘insert into ….’ wstawia wiersze do tej tabeli. Natomiast ‘select ...’ odczytuje wstawione dane.</li>
+<li>Funkcja commit() w obiekcie połączenia z bazą powoduje zakończenie zapytania i zapisanie danych na dysku.</li>
+</ul>
+
+
+    <script>
+        // Funkcja pomocnicza do kodowania UTF-8 do Base64
+        function utf8ToBase64(str) {
+            return btoa(unescape(encodeURIComponent(str)));
+        }
+
+        async function runJobeMultiFile(jobe_main, jobe_input, jobe_output) {
+            
+            const mainCode = document.getElementById(jobe_main).value;
+            const inputData = jobe_input ? document.getElementById(jobe_input).value : '';
+            const outputEl = document.getElementById(jobe_output);
+            
+            outputEl.innerText = "Komunikacja z serwerem Jobe...";
+            
+            const jobeApiUrl = 'https://jobe.otwartaedukacja.pl/jobe/index.php/restapi/runs';
+
+            // Wysyłamy pole sourcecode i input bezpośrednio
+            const payload = {
+                run_spec: {
+                    language_id: "python3",
+                    sourcecode: mainCode,
+                    input: inputData
+                }
+            };
+
+            try {
+                const response = await fetch(jobeApiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Błąd HTTP: ${response.status}`);
+                }
+
+                const result = await response.json();
+                
+                if (result.cmpinfo) {
+                    outputEl.innerText = "BŁĄD KOMPILACJI:\n" + result.cmpinfo;
+                } else if (result.stderr) {
+                    outputEl.innerText = "BŁĄD WYKONANIA:\n" + result.stderr;
+                } else {
+                    outputEl.innerText = result.stdout || "Brak danych na standardowym wyjściu.";
+                }
+                
+            } catch (error) {
+                outputEl.innerText = "Błąd połączenia z serwerem Jobe:\n" + error.message;
+            }
+        }
+    </script>
+</body>
+</html>
